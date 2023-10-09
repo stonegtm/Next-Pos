@@ -1,0 +1,49 @@
+body {
+    margin: 0 !important;
+}
+
+.sideBar {
+    height: 100vh;
+}
+
+.card-stock {
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+.card-stock .ant-card-body {
+    padding: 0 !important;
+}
+
+.ant-card-body {
+    padding: 10px !important;
+}
+
+.dp-al-center {
+    display: flex;
+    align-items: center;
+}
+
+.card-stock .ant-divider-horizontal {
+    margin: 12px 0;
+}
+
+.product-stock {
+    transition: 0.5s;
+}
+
+.product-stock:hover {
+    transition: 0.5s;
+    transform: scale(1.1);
+}
+
+.ant-layout-content {
+    margin: 16px 6px !important;
+    padding: 15px !important;
+}
+
+.card-footer-buttons {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px;
+}
