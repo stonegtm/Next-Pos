@@ -4,14 +4,23 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { ENV } from "../../../src/env/env";
 import { _post } from "../../../src/utils/axios";
+import { CloseCircleOutlined } from "@ant-design/icons";
 
+interface DataType {
+  key: string;
+  name: string;
+  age: number;
+  address: string;
+  tags: string[];
+}
 export default () => {
   const [dataForStock, setDataForStock] = useState<any>([]);
   const [modalAddProduct, setModalAddProduct] = useState(false);
   const [dataProduct, setDataProduct] = useState<any>([]);
+  const [refreshFlag, setRefreshFlag] = useState(false);
   const handleChange = () => {
     axios
-      .get(ENV.API_URL + "/product")
+      .get(ENV.API_URL + "/category/get-product-by-category")
       .then((response) => {
         if (response.data.result) {
           setDataProduct(response.data.data);
@@ -35,7 +44,7 @@ export default () => {
           id: item.id,
           name: item.name,
           price: item.price,
-          quantity: item.quantity,
+          quantity: 1,
           //   files: item.files,
         },
       ];
@@ -66,6 +75,15 @@ export default () => {
     // Update the state with the new array
     setDataForStock(newDataForStock);
   };
+  const handleDeleteItem = (item: any) => {
+    const updatedDataForStock = dataForStock.filter(
+      (existingItem: any) => existingItem.id !== item.id
+    );
+    setDataForStock(updatedDataForStock);
+
+    // Set the refresh flag to true to trigger a re-render
+    setRefreshFlag(true);
+  };
   const saveStock = () => {
     const stockData = {
       data_stock: JSON.stringify(dataForStock),
@@ -89,81 +107,91 @@ export default () => {
   };
   useEffect(() => {
     handleChange();
-  }, []);
+    setRefreshFlag(false);
+  }, [refreshFlag]);
   return (
     <Row>
       <Col xs={24} sm={24} md={16} lg={16} xl={18}>
-        <Card style={{ width: "100%", minHeight: "80vh" }}>
+        <Card
+          style={{ width: "100%", minHeight: "80vh" }}
+          title="หน้าเพิ่มสินค้า"
+        >
           <div
             style={{
               display: "flex",
               justifyContent: "flex-end",
               marginBottom: "10px",
+              position: "relative",
             }}
           >
-            <Button onClick={() => setModalAddProduct(!modalAddProduct)}>
+            <Button
+              style={{ position: "absolute", top: "-50px" }}
+              onClick={() => setModalAddProduct(!modalAddProduct)}
+            >
               เพิ่มสินค้า
             </Button>
           </div>
 
           <Tabs
             defaultActiveKey="1"
-            items={[
-              {
-                key: "1",
-                label: "EGG",
-                children: (
-                  <>
-                    <Row gutter={[8, 8]}>
-                      {dataProduct.map((data: any, index: number) => (
-                        <Col
-                          key={index}
-                          onClick={() => handleTabClick(data)}
-                          md={8}
-                          lg={4}
-                          sm={12}
-                          className="product-stock"
+            items={dataProduct.map((category: any, index: any) => ({
+              key: String(index + 1),
+              label: category.name,
+              children: (
+                <>
+                  <Row gutter={[8, 8]}>
+                    {category.product.map((product: any, productIndex: any) => (
+                      <Col
+                        key={productIndex}
+                        onClick={() => handleTabClick(product)}
+                        md={8}
+                        lg={4}
+                        sm={12}
+                        className="product-stock"
+                        style={{
+                          position: "relative",
+                          display: "flex",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <img
+                          src={product.files[0]?.image_url}
+                          width="90%"
+                          style={{ border: "1px solid #000" }}
+                        />
+                        <span
                           style={{
-                            position: "relative",
-                            display: "flex",
-                            justifyContent: "center",
+                            fontSize: 8,
+                            right: 0,
+                            position: "absolute",
+                            top: "10px",
+                            border: "1px solid #FB4073",
+                            color: "#000",
+                            padding: "0 10px",
+                            background: "#fff",
                           }}
                         >
-                          <img
-                            src={data.files[0]?.image_url}
-                            width="90%"
-                            style={{ border: "1px solid #000" }}
-                          />
-                          <p
-                            style={{
-                              fontSize: 8,
-                              position: "absolute",
-                              bottom: "-10px",
-                              border: "1px solid #FB4073",
-                              color: "#000",
-                              padding: "0 10px",
-                              background: "#fff",
-                            }}
-                          >
-                            {data.name}
-                          </p>
-                        </Col>
-                      ))}
-                    </Row>
-                  </>
-                ),
-              },
-              {
-                key: "2",
-                label: "WATER",
-                children: "Content of Tab Pane 2",
-              },
-              {
-                key: "3",
-                label: "OTHER",
-                children: "Content of Tab Pane 3",
-              },
-            ]}
+                          {product.quantity}
+                        </span>
+                        <p
+                          style={{
+                            fontSize: 10,
+                            position: "absolute",
+                            bottom: "-10px",
+                            border: "1px solid #FB4073",
+                            color: "#000",
+                            padding: "0 10px",
+                            background: "#fff",
+                          }}
+                        >
+                          {product.name}
+                        </p>
+                      </Col>
+                    ))}
+                  </Row>
+                </>
+              ),
+            }))}
             onChange={onChange}
           />
         </Card>
@@ -204,30 +232,68 @@ export default () => {
                     className="dp-al-center"
                     style={{ justifyContent: "center" }}
                   >
-                    {data.price}
+                    <span> {data.price}</span>
+                    <span
+                      onClick={() => {
+                        handleDeleteItem(data);
+                      }}
+                      style={{
+                        color: "red",
+                        padding: "0 5px",
+                        marginRight: 3,
+                        fontSize: 20,
+                        marginTop: "-2px",
+                      }}
+                    >
+                      <CloseCircleOutlined />
+                    </span>
                   </Col>
                 </Row>
                 <Divider style={{ marginTop: "-2px", marginBottom: "-2px" }} />
               </div>
             ))}
           </Col>
-          <div className="card-footer-buttons ">
-            <Button
-              onClick={() => setDataForStock([])}
-              style={{ marginRight: 5, width: "100%" }}
-            >
-              Clear
-            </Button>
-            <Button onClick={() => saveStock()} style={{ width: "100%" }}>
-              เพิ่ม stock
-            </Button>
-          </div>
+          <Row>
+            <Col span={24}>
+              <Button
+                onClick={() => {
+                  if (confirm("คุณต้องการจะล้างใหม่หรือไม่ ?")) {
+                    setDataForStock([]);
+                  }
+                }}
+                style={{
+                  width: "100%",
+                  height: 45,
+                  background: "red",
+                  color: "#fff",
+                  borderRadius: "10",
+                  fontSize: 18,
+                  marginBottom: 5,
+                }}
+              >
+                Clear
+              </Button>
+              <Button
+                onClick={() => saveStock()}
+                style={{
+                  width: "100%",
+                  height: 45,
+                  background: "green",
+                  color: "#fff",
+                  borderRadius: "10",
+                  fontSize: 18,
+                }}
+              >
+                เพิ่มสินค้า
+              </Button>
+            </Col>
+          </Row>
         </Card>
       </Col>
       <AddProduct
         openModal={modalAddProduct}
         setModalAddProduct={setModalAddProduct}
-        handleChange={handleChange()}
+        handleChange={handleChange}
       />
     </Row>
   );

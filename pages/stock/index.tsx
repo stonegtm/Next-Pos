@@ -238,9 +238,9 @@ export default () => {
           </div>
         </Card>
       </Col>
-      <AddCategory openModal={modalAddCategory} onClose={handleModalAddClose} />
+      <AddCategory openModal={modalAddCategory} getCategory={getCategory} onClose={handleModalAddClose} />
       <Modal
-        title="เพิ่มสินค้า"
+        title="เพิ่มเมนู"
         open={modalEditProduct}
         onCancel={handleCancel}
         footer={null}
