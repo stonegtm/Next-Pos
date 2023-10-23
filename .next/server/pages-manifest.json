@@ -1,7 +1,0 @@
-{
-  "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js",
-  "/stock/add-stock": "pages/stock/add-stock.js",
-  "/stock": "pages/stock.js"
-}
