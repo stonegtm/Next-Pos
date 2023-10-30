@@ -31,7 +31,7 @@ interface DataType {
   address: string;
   tags: string[];
 }
-export default () => {
+const Stock = () => {
   const [dataProduct, setDataProduct] = useState<DataType[]>([]);
   const [dataCategory, setDataCategory] = useState<DataType[]>([]);
   const [modalAddCategory, setModalAddCategory] = useState(false);
@@ -188,10 +188,12 @@ export default () => {
                   key: "image_url",
                   render: (text, record: any) => (
                     <div>
-                      <img
-                        src={record.files[0]?.image_url} // Assuming `image` is the field containing the image URL
-                        alt={text}
-                        style={{ width: "50px", height: "50px" }} // Adjust the size as needed
+                      <Image
+                        src={record.files[0]?.image_url}
+                        alt="Product Image" // Provide a meaningful alt text
+                        width={50} // Set the desired width
+                        height={50}
+                        style={{ border: "1px solid #000" }}
                       />
                     </div>
                   ),
@@ -238,7 +240,11 @@ export default () => {
           </div>
         </Card>
       </Col>
-      <AddCategory openModal={modalAddCategory} getCategory={getCategory} onClose={handleModalAddClose} />
+      <AddCategory
+        openModal={modalAddCategory}
+        getCategory={getCategory}
+        onClose={handleModalAddClose}
+      />
       <Modal
         title="เพิ่มเมนู"
         open={modalEditProduct}
@@ -270,7 +276,12 @@ export default () => {
                   key={index}
                   style={{ position: "relative", width: 100, margin: 5 }}
                 >
-                  <Image width={100} src={item?.image_url} />
+                  <Image
+                    src={item?.image_url}
+                    alt="Product Image" // Provide a meaningful alt text
+                    width={100} // Set the desired width
+                    style={{ border: "1px solid #000" }}
+                  />
                   <span
                     onClick={() => {
                       const files = imageUrl;
@@ -331,3 +342,5 @@ export default () => {
     </Row>
   );
 };
+
+export default Stock;

@@ -5,7 +5,7 @@ import {
 } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 type MenuItem = Required<any>["items"][number];
 function getItem(
   label: React.ReactNode,
@@ -47,7 +47,7 @@ export default function LayoutSidebar({ onOff }: Props) {
   const router = useRouter();
   const [keyActive, setKeyActive] = useState<any>("");
 
-  const onActiveMenu = () => {
+  const onActiveMenu = useCallback(() => {
     if (router.pathname === "/stock") {
       setKeyActive("/stock");
     } else if (router.pathname === "/") {
@@ -57,11 +57,11 @@ export default function LayoutSidebar({ onOff }: Props) {
     } else if (router.pathname === "/sale") {
       setKeyActive("/sale");
     }
-  };
+  }, [router.pathname, setKeyActive]);
 
   useEffect(() => {
-    onActiveMenu(); // Call the function
-  }, [keyActive, router.pathname]); // Include keyActive and router.pathname as dependencies
+    onActiveMenu();
+  }, [onActiveMenu]); // Include keyActive and router.pathname as dependencies
 
   const onChangeMenu = (value: any) => {
     console.log("value======:: ", value);

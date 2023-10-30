@@ -1,11 +1,11 @@
-import { Button, Card, Col, Divider, Input, Row, Tabs, message } from "antd";
+import { Button, Card, Col, Divider, Input, Row, Tabs, message,Image } from "antd";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ENV } from "../../src/env/env";
 import { _post } from "../../src/utils/axios";
 import { CloseCircleOutlined } from "@ant-design/icons";
 
-export default () => {
+const Sale = () => {
   const [dataForStock, setDataForStock] = useState<any>([]);
   const [dataProduct, setDataProduct] = useState<any>([]);
   const [refreshFlag, setRefreshFlag] = useState(false);
@@ -25,15 +25,14 @@ export default () => {
         console.error("Error:", error);
       });
   };
-  const calculatePrice = () => {
-    // console.log(dataForStock);
+  const calculatePrice = useCallback(() => {
     let priceSum = 0;
     dataForStock?.map((item: any) => {
       priceSum += item.price * item.quantity;
     });
     setPriceSum(priceSum);
-    setPriceSumDiscount(priceSum - discount)
-  };
+    setPriceSumDiscount(priceSum - discount);
+  }, [dataForStock, discount]);
   const handleTabClick = (item: any) => {
     const existingItemIndex = dataForStock.findIndex(
       (existingItem: any) => existingItem.name === item.name
@@ -111,7 +110,8 @@ export default () => {
   }, [refreshFlag]);
   useEffect(() => {
     calculatePrice();
-  }, [dataForStock, discount]);
+  }, [dataForStock, discount, calculatePrice]);
+
   return (
     <Row>
       <Col xs={24} sm={24} md={16} lg={16} xl={18}>
@@ -147,9 +147,11 @@ export default () => {
                           justifyContent: "center",
                         }}
                       >
-                        <img
+                        <Image
                           src={product.files[0]?.image_url}
-                          width="90%"
+                          preview={false}
+                          alt="Product Image" // Provide a meaningful alt text
+                          width={500} // Set the desired width
                           style={{ border: "1px solid #000" }}
                         />
                         <span
@@ -373,3 +375,4 @@ export default () => {
     </Row>
   );
 };
+export default Sale;

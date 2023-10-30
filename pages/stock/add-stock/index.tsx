@@ -1,5 +1,5 @@
 import AddProduct from "@/src/components/modal/add-product";
-import { Button, Card, Col, Divider, Input, Row, Tabs, message } from "antd";
+import { Button, Card, Col, Divider, Input, Row, Tabs, message,Image } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { ENV } from "../../../src/env/env";
@@ -13,7 +13,7 @@ interface DataType {
   address: string;
   tags: string[];
 }
-export default () => {
+const AddStock = () => {
   const [dataForStock, setDataForStock] = useState<any>([]);
   const [modalAddProduct, setModalAddProduct] = useState(false);
   const [dataProduct, setDataProduct] = useState<any>([]);
@@ -154,9 +154,11 @@ export default () => {
                           justifyContent: "center",
                         }}
                       >
-                        <img
+                        <Image
                           src={product.files[0]?.image_url}
-                          width="90%"
+                          preview={false}
+                          alt="Product Image" // Provide a meaningful alt text
+                          width={500} // Set the desired width
                           style={{ border: "1px solid #000" }}
                         />
                         <span
@@ -298,3 +300,4 @@ export default () => {
     </Row>
   );
 };
+export default AddStock;
