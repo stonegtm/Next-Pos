@@ -24,6 +24,7 @@ import {
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { _patchFile } from "../../src/utils/axios";
+import AddProduct from "@/src/components/modal/add-product";
 interface DataType {
   key: string;
   name: string;
@@ -36,9 +37,12 @@ export default () => {
   const [dataCategory, setDataCategory] = useState<DataType[]>([]);
   const [modalAddCategory, setModalAddCategory] = useState(false);
   const [modalEditProduct, setModalEditProduct] = useState(false);
+  const [modalAddProduct, setModalAddProduct] = useState(false);
+
   const [fileList, setFileList] = useState<any>([]);
   const [imageUrl, setImageUrl] = useState<any>([]);
   const [deleteImage, setDeleteImageUrl] = useState<any>([]);
+
   const handleChange = (value: string) => {
     axios
       .get(ENV.API_URL + "/product?category=" + value)
@@ -65,6 +69,7 @@ export default () => {
         name: res.data.data.name,
         description: res.data.data.description,
         price: res.data.data.price,
+        quantity: res.data.data.quantity,
         files: res.data.data.files || null,
       });
       setImageUrl(res.data.data.files);
@@ -114,9 +119,10 @@ export default () => {
     const values = form.getFieldValue(id);
     const formData = new FormData();
     formData.append("name", values.name);
+    formData.append("quantity", values.quantity);
     formData.append("description", values.description);
     formData.append("price", values.price);
-    formData.append("category_id", "5cca83c4-9092-437f-a4da-f88235c31fd0");
+    // formData.append("category_id", "5cca83c4-9092-437f-a4da-f88235c31fd0");
     const arrayAsString = deleteImage.join(",");
     formData.append("image_delete", arrayAsString);
     fileList.forEach((file: any) => {
@@ -142,6 +148,7 @@ export default () => {
     }
     return e?.fileList;
   };
+
   const handleChangeImage: UploadProps["onChange"] = ({
     fileList: newFileList,
   }) => setFileList(newFileList);
@@ -153,6 +160,17 @@ export default () => {
     <Row>
       <Col span={24}>
         <Card title="ตารางสินค้า">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginBottom: "10px",
+            }}
+          >
+            <Button onClick={() => setModalAddProduct(!modalAddProduct)}>
+              เพิ่มสินค้า
+            </Button>
+          </div>
           <div style={{ display: "flex", gap: 8, marginBottom: 5 }}>
             <div>
               <Select
@@ -240,7 +258,7 @@ export default () => {
       </Col>
       <AddCategory openModal={modalAddCategory} onClose={handleModalAddClose} />
       <Modal
-        title="เพิ่มสินค้า"
+        title="แก้ไขสินค้า"
         open={modalEditProduct}
         onCancel={handleCancel}
         footer={null}
@@ -255,6 +273,9 @@ export default () => {
           </Form.Item>
           <Form.Item name="description" label="รายละเอียดสินค้า">
             <Input placeholder="ใส่รายละเอียดสินค้า" />
+          </Form.Item>
+          <Form.Item name="quantity" label="จำนวนสินค้า">
+            <Input placeholder="ใส่จำนวน" />
           </Form.Item>
           <Form.Item name="price" label="ราคา">
             <Input placeholder="ใส่ราคา" />
@@ -328,6 +349,11 @@ export default () => {
           </Form.Item>
         </Form>
       </Modal>
+      <AddProduct
+        openModal={modalAddProduct}
+        setModalAddProduct={setModalAddProduct}
+        handleChangeData={getProduct}
+      />
     </Row>
   );
 };

@@ -16,7 +16,7 @@ import { ENV } from "../../env/env";
 type Props = {
   openModal: boolean;
   setModalAddProduct: Dispatch<SetStateAction<boolean>>;
-  handleChange: void;
+  handleChangeData: () => void;
 };
 interface DataType {
   key: string;
@@ -63,6 +63,8 @@ const AddProduct: React.FC<Props> = (props) => {
     formData.append("name", values.name);
     formData.append("description", values.description);
     formData.append("price", values.price);
+    formData.append("quantity", values.quantity);
+    formData.append("unit", values.unit);
     formData.append("category_id", values.category);
     // Append files to formData
     fileList.forEach((file: any) => {
@@ -72,13 +74,13 @@ const AddProduct: React.FC<Props> = (props) => {
       if (response.result) {
         message.success("เพิ่มสินค้าสำเร็จแล้ว");
         form.resetFields();
+        props.handleChangeData()
         setFileList([]);
         setModal(false);
       } else {
         message.error("เพิ่มสินค้าไม่สำเร็จ");
       }
     });
-    props.handleChange;
   };
   const onFinishFailed = () => {
     message.error("Submit failed!");
@@ -132,6 +134,12 @@ const AddProduct: React.FC<Props> = (props) => {
           </Form.Item>
           <Form.Item name="price" label="ราคา">
             <Input placeholder="ใส่ราคา" />
+          </Form.Item>
+          <Form.Item name="quantity" label="จำนวน">
+            <Input placeholder="ใส่จำนวน" />
+          </Form.Item>
+          <Form.Item name="unit" label="ประเภทหน่วย">
+            <Input placeholder="ใส่หน่วย ยกตัวอย่างเช่น ชิ้น, แผง เป็นต้น" />
           </Form.Item>
           <Form.Item
             label="Upload"
