@@ -73,6 +73,7 @@ const AddProduct: React.FC<Props> = (props) => {
     _postFile(ENV.API_URL + "/product", formData).then((response) => {
       if (response.result) {
         message.success("เพิ่มสินค้าสำเร็จแล้ว");
+        props.handleChangeData();
         form.resetFields();
         props.handleChangeData();
         setModal(false);
@@ -82,6 +83,7 @@ const AddProduct: React.FC<Props> = (props) => {
         setModal(false);
       }
     });
+    
   };
   const onFinishFailed = () => {
     message.error("Submit failed!");

@@ -5,6 +5,7 @@ import { ENV } from "../../env/env";
 
 type Props = {
   openModal: boolean;
+  getCategory: () => void;
   onClose: (returnValue: any) => void;
 };
 
@@ -32,6 +33,7 @@ const AddCategory: React.FC<Props> = (props) => {
     _post(ENV.API_URL + "/category", data_category).then((response) => {
       if (response.result) {
         message.success("เพิ่มเมนูสำเร็จแล้ว");
+        props.getCategory()
         form.resetFields();
         setModal(false);
       } else {

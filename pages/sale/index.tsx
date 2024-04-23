@@ -1,23 +1,18 @@
-import AddProduct from "@/src/components/modal/add-product";
 import { Button, Card, Col, Divider, Input, Row, Tabs, message,Image } from "antd";
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { ENV } from "../../../src/env/env";
-import { _post } from "../../../src/utils/axios";
+import { useCallback, useEffect, useState } from "react";
+import { ENV } from "../../src/env/env";
+import { _post } from "../../src/utils/axios";
 import { CloseCircleOutlined } from "@ant-design/icons";
 
-interface DataType {
-  key: string;
-  name: string;
-  age: number;
-  address: string;
-  tags: string[];
-}
-const AddStock = () => {
+const Sale = () => {
   const [dataForStock, setDataForStock] = useState<any>([]);
-  const [modalAddProduct, setModalAddProduct] = useState(false);
   const [dataProduct, setDataProduct] = useState<any>([]);
   const [refreshFlag, setRefreshFlag] = useState(false);
+  const [priceSum, setPriceSum] = useState(0);
+  const [priceSumDiscount, setPriceSumDiscount] = useState(0);
+  const [discount, setDiscount] = useState(0);
+  //   const [priceSum, setPriceSum] = useState(0);
   const handleChange = () => {
     axios
       .get(ENV.API_URL + "/category/get-product-by-category")
@@ -30,73 +25,76 @@ const AddStock = () => {
         console.error("Error:", error);
       });
   };
+  const calculatePrice = useCallback(() => {
+    let priceSum = 0;
+    dataForStock?.map((item: any) => {
+      priceSum += item.price * item.quantity;
+    });
+    setPriceSum(priceSum);
+    setPriceSumDiscount(priceSum - discount);
+  }, [dataForStock, discount]);
   const handleTabClick = (item: any) => {
-    // Check if the item already exists in the dataForStock array
     const existingItemIndex = dataForStock.findIndex(
       (existingItem: any) => existingItem.name === item.name
     );
-
     if (existingItemIndex === -1) {
-      // If the item doesn't exist, push it into the array
       const newDataForStock = [
         ...dataForStock,
         {
           id: item.id,
           name: item.name,
           price: item.price,
+          priceSum: item.price,
           quantity: 1,
-          //   files: item.files,
         },
       ];
-
-      // Update the state with the new array
       setDataForStock(newDataForStock);
     } else {
-      // If the item exists, increase its quantity by 1
       const newDataForStock = [...dataForStock];
       newDataForStock[existingItemIndex].quantity += 1;
+      newDataForStock[existingItemIndex].priceSum =
+        newDataForStock[existingItemIndex].quantity * item.price;
       setDataForStock(newDataForStock);
     }
   };
-  const handleQuantityChange = (index: number, newQuantity: number | null) => {
-    // Create a copy of the dataForStock array
+  const handlePriceChange = (index: number, quantity: number | null) => {
     const newDataForStock = [...dataForStock];
-
-    // If newQuantity is null or NaN, set it to 1
-    newQuantity =
-      isNaN(newQuantity!) || newQuantity === null ? 1 : newQuantity!;
-
-    // Ensure the newQuantity is at least 1
-    newQuantity = Math.max(newQuantity, 1);
-
-    // Update the quantity of the item at the specified index
-    newDataForStock[index].quantity = newQuantity;
-
-    // Update the state with the new array
+    newDataForStock[index].priceSum = isNaN(Number(quantity))
+      ? 0
+      : newDataForStock[index].price * Number(quantity);
     setDataForStock(newDataForStock);
+  };
+  const handleQuantityChange = (index: number, newQuantity: number | null) => {
+    const newDataForStock = [...dataForStock];
+    newQuantity =
+      isNaN(newQuantity!) || newQuantity === null ? 0 : newQuantity!;
+    newDataForStock[index].quantity = newQuantity;
+    setDataForStock(newDataForStock);
+  };
+  const handleDiscountChange = (newDiscount: number | null) => {
+    newDiscount =
+      isNaN(newDiscount!) || newDiscount === null ? 0 : newDiscount!;
+    setDiscount(newDiscount);
   };
   const handleDeleteItem = (item: any) => {
     const updatedDataForStock = dataForStock.filter(
       (existingItem: any) => existingItem.id !== item.id
     );
     setDataForStock(updatedDataForStock);
-
-    // Set the refresh flag to true to trigger a re-render
     setRefreshFlag(true);
   };
   const saveStock = () => {
     const stockData = {
       data_stock: JSON.stringify(dataForStock),
     };
-    // console.log(stockData);
     if (stockData) {
       _post(ENV.API_URL + "/product/update_stock", stockData).then(
         (response) => {
           if (response.result) {
-            message.success("เพิ่มสินค้าสำเร็จแล้ว");
+            message.success("ขายสินค้าสำเร็จแล้ว");
             setDataForStock([]);
           } else {
-            message.error("เพิ่มสินค้าไม่สำเร็จ");
+            message.error("ขายสินค้าไม่สำเร็จ");
           }
         }
       );
@@ -108,14 +106,16 @@ const AddStock = () => {
   useEffect(() => {
     handleChange();
     setRefreshFlag(false);
+    // getCategory();
   }, [refreshFlag]);
+  useEffect(() => {
+    calculatePrice();
+  }, [dataForStock, discount, calculatePrice]);
+
   return (
     <Row>
       <Col xs={24} sm={24} md={16} lg={16} xl={18}>
-        <Card
-          style={{ width: "100%", minHeight: "80vh" }}
-          title="หน้าเพิ่มสินค้า"
-        >
+        <Card style={{ width: "100%", minHeight: "90vh" }} title="ขายสินค้า">
           <div
             style={{
               display: "flex",
@@ -123,14 +123,7 @@ const AddStock = () => {
               marginBottom: "10px",
               position: "relative",
             }}
-          >
-            <Button
-              style={{ position: "absolute", top: "-50px" }}
-              onClick={() => setModalAddProduct(!modalAddProduct)}
-            >
-              เพิ่มสินค้า
-            </Button>
-          </div>
+          ></div>
 
           <Tabs
             defaultActiveKey="1"
@@ -179,6 +172,19 @@ const AddStock = () => {
                           style={{
                             fontSize: 10,
                             position: "absolute",
+                            bottom: "10px",
+                            border: "1px solid #FB4073",
+                            color: "#000",
+                            padding: "0 10px",
+                            background: "#fff",
+                          }}
+                        >
+                          {Number(product.price)}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: 10,
+                            position: "absolute",
                             bottom: "-10px",
                             border: "1px solid #FB4073",
                             color: "#000",
@@ -201,10 +207,10 @@ const AddStock = () => {
       <Col xs={0} sm={0} md={8} lg={8} xl={6} style={{ paddingLeft: 5 }}>
         <Card
           className="card-stock"
-          title="เพิ่มจำนวนสินค้าใน STOCK"
-          style={{ minHeight: "80vh" }}
+          title="สินค้าที่เลือกเพื่อขาย"
+          style={{ minHeight: "50vh" }}
         >
-          <Col style={{ minHeight: "65vh" }}>
+          <Col style={{ minHeight: "60vh" }}>
             {dataForStock.map((data: any, index: number) => (
               <div key={index}>
                 <Row style={{ padding: 5 }}>
@@ -213,9 +219,10 @@ const AddStock = () => {
                       type="text"
                       value={data.quantity}
                       style={{ textAlign: "center" }}
-                      onChange={(e) =>
-                        handleQuantityChange(index, parseInt(e.target.value))
-                      }
+                      onChange={(e) => {
+                        handleQuantityChange(index, parseInt(e.target.value)),
+                          handlePriceChange(index, parseInt(e.target.value));
+                      }}
                     ></Input>
                   </Col>
                   <Col
@@ -234,7 +241,7 @@ const AddStock = () => {
                     className="dp-al-center"
                     style={{ justifyContent: "center" }}
                   >
-                    <span> {data.price}</span>
+                    <span>{data.priceSum}</span>
                     <span
                       onClick={() => {
                         handleDeleteItem(data);
@@ -255,49 +262,117 @@ const AddStock = () => {
               </div>
             ))}
           </Col>
-          <Row>
-            <Col span={24}>
-              <Button
-                onClick={() => {
-                  if (confirm("คุณต้องการจะล้างใหม่หรือไม่ ?")) {
-                    setDataForStock([]);
+          <Divider />
+          <Col>
+            <Row>
+              <Col
+                span={12}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  fontWeight: 700,
+                }}
+              >
+                <span style={{ padding: 5 }}>ส่วนลด</span>
+              </Col>
+              <Col
+                span={12}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Input
+                  type="text"
+                  value={discount}
+                  style={{
+                    textAlign: "right",
+                    borderRadius: 0,
+                    border: "0.5px solid rgba(0,0,0,0.5)",
+                    marginRight: 5,
+                    width: "50%",
+                  }}
+                  onChange={(e) =>
+                    handleDiscountChange(parseInt(e.target.value))
                   }
-                }}
+                ></Input>
+              </Col>
+              <Divider />
+              <Col
+                span={12}
                 style={{
-                  width: "100%",
-                  height: 45,
-                  background: "red",
-                  color: "#fff",
-                  borderRadius: "10",
-                  fontSize: 18,
-                  marginBottom: 5,
+                  fontWeight: 700,
                 }}
               >
-                Clear
-              </Button>
-              <Button
-                onClick={() => saveStock()}
+                <span style={{ padding: 5 }}>ราคาก่อนลด</span>
+              </Col>
+              <Col
+                span={12}
                 style={{
-                  width: "100%",
-                  height: 45,
-                  background: "green",
-                  color: "#fff",
-                  borderRadius: "10",
-                  fontSize: 18,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-end",
                 }}
               >
-                เพิ่มสินค้า
-              </Button>
-            </Col>
-          </Row>
+                <span style={{ padding: 5 }}>{priceSum}</span>
+              </Col>
+              <Col
+                span={12}
+                style={{
+                  fontWeight: 700,
+                }}
+              >
+                <span style={{ padding: 5 }}>ราคารวมทั้งหมด</span>
+              </Col>
+              <Col
+                span={12}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <span style={{ padding: 5 }}>{priceSumDiscount}</span>
+              </Col>
+              <Col span={24}>
+                <Button
+                  onClick={() => {
+                    if (confirm("คุณต้องการจะล้างใหม่หรือไม่ ?")) {
+                      setDataForStock([]);
+                    }
+                  }}
+                  style={{
+                    width: "100%",
+                    height: 45,
+                    background: "red",
+                    color: "#fff",
+                    borderRadius: "10",
+                    fontSize: 18,
+                    marginBottom: 5,
+                  }}
+                >
+                  Clear
+                </Button>
+                <Button
+                  onClick={() => saveStock()}
+                  style={{
+                    width: "100%",
+                    height: 45,
+                    background: "green",
+                    color: "#fff",
+                    borderRadius: "10",
+                    fontSize: 18,
+                  }}
+                >
+                  ขายสินค้า
+                </Button>
+              </Col>
+            </Row>
+          </Col>
         </Card>
       </Col>
-      <AddProduct
-        openModal={modalAddProduct}
-        setModalAddProduct={setModalAddProduct}
-        handleChange={handleChange}
-      />
     </Row>
   );
 };
-export default AddStock;
+export default Sale;

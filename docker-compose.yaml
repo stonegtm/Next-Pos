@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  nextjs-app:
+    build:
+      dockerfile: Dockerfile
+    container_name: nextjs-container
+    ports:
+      - "3000:3000"
