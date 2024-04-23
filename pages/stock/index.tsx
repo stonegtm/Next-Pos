@@ -63,7 +63,7 @@ export default () => {
   };
 
   const handleEdit = (record: any) => {
-    axios.get(ENV.API_URL + "/product/" + record.id).then((res: any) => {
+    axios.get(ENV.API_URL + "/product/get-one-product/" + record.id).then((res: any) => {
       form.setFieldsValue({
         id: res.data.data.id,
         name: res.data.data.name,
@@ -79,7 +79,7 @@ export default () => {
   const handleDelete = async (record: any) => {
     if (confirm("คุณต้องการลบสินค้านี้ใช่หรือไม่ ?")) {
       axios
-        .delete(ENV.API_URL + "/product/" + record.id)
+        .delete(ENV.API_URL + "/product/get-one-product/" + record.id)
         .then((response) => {
           if (response.data.result) {
             message.success("ลบสินค้าสำเร็จแล้ว");

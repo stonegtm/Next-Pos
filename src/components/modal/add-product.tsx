@@ -41,7 +41,7 @@ const AddProduct: React.FC<Props> = (props) => {
     axios
       .get(ENV.API_URL + "/category")
       .then((response) => {
-        const category: any = [{ label: "ทั้งหมด", value: "" }];
+        const category: any = [];
         response.data.data.map((data: any) => {
           category.push({ label: data.name, value: data.id });
         });
@@ -65,7 +65,7 @@ const AddProduct: React.FC<Props> = (props) => {
     formData.append("price", values.price);
     formData.append("quantity", values.quantity);
     formData.append("unit", values.unit);
-    formData.append("category_id", values.category);
+    formData.append("category_id", JSON.stringify(values.category));
     // Append files to formData
     fileList.forEach((file: any) => {
       formData.append("files", file.originFileObj); // Append the File object directly
@@ -74,11 +74,12 @@ const AddProduct: React.FC<Props> = (props) => {
       if (response.result) {
         message.success("เพิ่มสินค้าสำเร็จแล้ว");
         form.resetFields();
-        props.handleChangeData()
-        setFileList([]);
+        props.handleChangeData();
         setModal(false);
+        setFileList([]);
       } else {
         message.error("เพิ่มสินค้าไม่สำเร็จ");
+        setModal(false);
       }
     });
   };
@@ -119,6 +120,7 @@ const AddProduct: React.FC<Props> = (props) => {
 
           <Form.Item name="category" label="เมนู" rules={[{ required: true }]}>
             <Select
+              mode="multiple"
               placeholder="เลือกเมนู"
               style={{ width: 200 }}
               options={[
@@ -148,12 +150,12 @@ const AddProduct: React.FC<Props> = (props) => {
           >
             <Upload
               onChange={handleChange}
-              beforeUpload={() => false} // Prevent default upload behavior
+              beforeUpload={() => false} // Prevents the default upload behavior to handle manually
               name="image"
               listType="picture-card"
+              fileList={fileList} // Ensures controlled component behavior
             >
               <div>
-                {/* <PlusOutlined /> */}
                 <div style={{ marginTop: 8 }}>Upload</div>
               </div>
             </Upload>
