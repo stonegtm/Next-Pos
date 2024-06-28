@@ -92,37 +92,28 @@ export default () => {
         discount: discount,
         totalAmount: totalPrice,
         totalSumAll: totalPrice - discount,
-        notes:note,
-        product_detial: dataForStock,
+        notes: note,
+        product_detail: dataForStock,
       };
-      console.log(data);
+      _post(ENV.API_URL + "/sale/product", data).then((response) => {
+        if (response.result) {
+          message.success("ขายสินค้าสำเร็จแล้ว");
+          setDataForStock([]);
+        } else {
+          message.error("ขายสินค้าไม่สำเร็จ");
+        }
+      });
     }
-    // const stockData = {
-    //   data_stock: JSON.stringify(dataForStock),
-    // };
-    // // console.log(stockData);
-    // if (stockData) {
-    //   _post(ENV.API_URL + "/product/update_stock", stockData).then(
-    //     (response) => {
-    //       if (response.result) {
-    //         message.success("เพิ่มสินค้าสำเร็จแล้ว");
-    //         setDataForStock([]);
-    //       } else {
-    //         message.error("เพิ่มสินค้าไม่สำเร็จ");
-    //       }
-    //     }
-    //   );
-    // }
   };
   const items = dataProduct.map((tabData: any, tabIndex: number) => ({
     key: String(tabIndex + 1), // Key must be a string
     label: tabData.name, // Assuming each tabData has a label field
     children: (
       <Row gutter={[8, 8]}>
-        {tabData.products?.map((data: any, index: any) => (
+        {tabData.productConnections?.map((data: any, index: any) => (
           <Col
             key={index}
-            onClick={() => handleTabClick(data)}
+            onClick={() => handleTabClick(data.product)}
             md={8}
             lg={6}
             sm={12}
@@ -134,7 +125,7 @@ export default () => {
             }}
           >
             <img
-              src={data.files[0]?.image_url || "default-image.jpg"} // Provide a default image in case of missing URL
+              src={data.product.files[0]?.image_url || "default-image.jpg"} // Provide a default image in case of missing URL
               width="90%"
               style={{ border: "1px solid #000" }}
             />
@@ -149,7 +140,7 @@ export default () => {
                 background: "#fff",
               }}
             >
-              {data.name}
+              {data.product.name}
             </p>
           </Col>
         ))}
@@ -263,7 +254,7 @@ export default () => {
           <Divider style={{ padding: "0" }} />
           <Col style={{ padding: "0 20px" }}>
             <Input
-            style={{ textAlign: "left" }}
+              style={{ textAlign: "left" }}
               onChange={handleNoteChange}
               value={note}
               placeholder="รายละเอียด"

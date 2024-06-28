@@ -1,8 +1,13 @@
 import axios from "axios";
 import { IResponses } from "../interfaces/responses";
-
+import cookies from "js-cookie";
 const _get = async (url: string) => {
-  const res: any = axios.get(url);
+  const token = cookies.get("token");
+  const res: any = axios.get(url, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`},
+  });
   return res;
 };
 const _post = async (url: string, body?: any): Promise<IResponses<any>> => {

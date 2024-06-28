@@ -33,6 +33,11 @@ const navMenu: MenuItem[] = [
     label: "Sales",
   },
   {
+    key: "/list-sales",
+    icon: <ShoppingCartOutlined />,
+    label: "List sales",
+  },
+  {
     key: "/",
     icon: <UserOutlined />,
     label: "Dashboard",
@@ -56,6 +61,8 @@ export default function LayoutSidebar({ onOff }: Props) {
       setKeyActive("/");
     } else if (router.pathname === "/stock/add-stock") {
       setKeyActive("/stock/add-stock");
+    } else if (router.pathname === "/list-sales") {
+      setKeyActive("/list-sales");
     }
   };
 
@@ -64,12 +71,12 @@ export default function LayoutSidebar({ onOff }: Props) {
   }, [keyActive, router.pathname]); // Include keyActive and router.pathname as dependencies
 
   const onChangeMenu = (value: any) => {
-    console.log("value======:: ", value);
+    // console.log("value======:: ", value);
 
     router.push(value.key);
   };
   return (
-    <Layout.Sider trigger={null} collapsible collapsed={onOff}>
+    <Layout.Sider trigger={null} collapsible collapsed={onOff} >
       <div className="demo-logo-vertical" />
       <Menu
         className="sideBar"

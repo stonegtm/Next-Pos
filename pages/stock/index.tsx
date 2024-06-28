@@ -264,11 +264,7 @@ const Stock = () => {
         onClose={handleModalAddClose}
       />
       <Modal
-<<<<<<< HEAD
         title="แก้ไขสินค้า"
-=======
-        title="เพิ่มเมนู"
->>>>>>> 9a2314570220d1a5c2a24bec68a6296503621749
         open={modalEditProduct}
         onCancel={handleCancel}
         footer={null}
