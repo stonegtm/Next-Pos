@@ -31,7 +31,7 @@ const MyComponent = () => {
   return (
     <Col
       span={24}
-      style={{ height: "100vh", background: "#fff", padding: "0" }}
+      style={{ minHeight: "50vh", background: "#fff", padding: "0" }}
     >
       <div>
         <Row gutter={8}>

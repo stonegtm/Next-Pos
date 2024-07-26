@@ -33,6 +33,32 @@ interface DataType {
   tags: string[];
 }
 const Stock = () => {
+  const options = [
+    {
+      label: "China",
+      value: "china",
+      emoji: "🇨🇳",
+      desc: "China (中国)",
+    },
+    {
+      label: "USA",
+      value: "usa",
+      emoji: "🇺🇸",
+      desc: "USA (美国)",
+    },
+    {
+      label: "Japan",
+      value: "japan",
+      emoji: "🇯🇵",
+      desc: "Japan (日本)",
+    },
+    {
+      label: "Korea",
+      value: "korea",
+      emoji: "🇰🇷",
+      desc: "Korea (韩国)",
+    },
+  ];
   const [dataProduct, setDataProduct] = useState<DataType[]>([]);
   const [dataCategory, setDataCategory] = useState<DataType[]>([]);
   const [modalAddCategory, setModalAddCategory] = useState(false);
@@ -63,18 +89,24 @@ const Stock = () => {
   };
 
   const handleEdit = (record: any) => {
-    axios.get(ENV.API_URL + "/product/get-one-product/" + record.id).then((res: any) => {
-      form.setFieldsValue({
-        id: res.data.data.id,
-        name: res.data.data.name,
-        description: res.data.data.description,
-        price: res.data.data.price,
-        quantity: res.data.data.quantity,
-        files: res.data.data.files || null,
+    axios
+      .get(ENV.API_URL + "/product/get-one-product/" + record.id)
+      .then((res: any) => {
+        const categoryIds = res.data.data.categoryConnections.map(
+          (connection: any) => connection?.category?.id
+        );
+        form.setFieldsValue({
+          id: res.data.data.id,
+          name: res.data.data.name,
+          description: res.data.data.description,
+          price: res.data.data.price,
+          quantity: res.data.data.quantity,
+          category: categoryIds,
+          files: res.data.data.files || null,
+        });
+        setImageUrl(res.data.data.files);
+        setModalEditProduct(true);
       });
-      setImageUrl(res.data.data.files);
-      setModalEditProduct(true);
-    });
   };
   const handleDelete = async (record: any) => {
     if (confirm("คุณต้องการลบสินค้านี้ใช่หรือไม่ ?")) {
@@ -122,7 +154,7 @@ const Stock = () => {
     formData.append("quantity", values.quantity);
     formData.append("description", values.description);
     formData.append("price", values.price);
-    // formData.append("category_id", "5cca83c4-9092-437f-a4da-f88235c31fd0");
+    formData.append("category_id", JSON.stringify(values.category));
     const arrayAsString = deleteImage.join(",");
     formData.append("image_delete", arrayAsString);
     fileList.forEach((file: any) => {
@@ -285,6 +317,15 @@ const Stock = () => {
           </Form.Item>
           <Form.Item name="price" label="ราคา">
             <Input placeholder="ใส่ราคา" />
+          </Form.Item>
+          <Form.Item name="category" label="เมนู">
+            <Select
+              mode="multiple"
+              style={{ width: "100%" }}
+              placeholder="Select Category"
+              // onChange={handleChange}
+              options={dataCategory}
+            />
           </Form.Item>
           <Form.Item
             label="รูปภาพ"
