@@ -44,7 +44,7 @@ const navMenu: MenuItem[] = [
   },
   getItem("Stock", "sub1", <DropboxOutlined />, [
     getItem("สินค้า", "/stock"),
-    getItem("เพิ่มสินค้า", "/stock/add-stock"), // Add onClick handler
+    // getItem("เพิ่มสินค้า", "/stock/add-stock"), // Add onClick handler
   ]),
 ];
 
